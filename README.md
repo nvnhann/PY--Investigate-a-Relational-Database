@@ -2,6 +2,15 @@
 Author: Nhan V. Ng
 Date: 2024/03/05
 
+## Introduction
+In this project, you will query the Sakila DVD Rental database. The Sakila Database holds information about a company that rents movie DVDs. For this project, you will be querying the database to gain an understanding of the customer base, such as what the patterns in movie watching are across different customer groups, how they compare on payment earnings, and how the stores compare in their performance. To assist you in the queries ahead, the schema for the DVD Rental database is provided below.
+
+(Note: One quirk you may notice as you explore this "fake" database is that the rental dates are all from 2005 and 2006, while the payment dates are all from 2007. Don't worry about this. )
+
+Source: [http://www.postgresqltutorial.com/postgresql-sample-database/](http://www.postgresqltutorial.com/postgresql-sample-database/)
+
+<img src="./erd.png" />
+
 
 ```python
 !pip install pandas matplotlib
@@ -36,7 +45,7 @@ plt.show()
 
 
     
-![png](analyst_files/analyst_4_0.png)
+![png](analyst_files/analyst_5_0.png)
     
 
 
@@ -68,7 +77,7 @@ plt.show()
 
 
     
-![png](analyst_files/analyst_6_0.png)
+![png](analyst_files/analyst_7_0.png)
     
 
 
@@ -101,7 +110,7 @@ plt.show()
 
 
     
-![png](analyst_files/analyst_8_0.png)
+![png](analyst_files/analyst_9_0.png)
     
 
 
@@ -112,28 +121,27 @@ Count of rental orders during every month for all the years
 
 ```python
 df = pd.read_csv("data/s2_q1.csv")
-# Group by rental_year and rental_month and sum the counts
-grouped_df = df.groupby(['rental_year', 'rental_month']).sum().reset_index()
+pivot_df = df.pivot_table(index=['rental_year', 'rental_month'], columns='store_id', values='count_rentals').fillna(0)
 
-# Plotting the graph
-fig, ax = plt.subplots(figsize=(10, 6))
-
-for year in grouped_df['rental_year'].unique():
-    year_data = grouped_df[grouped_df['rental_year'] == year]
-    ax.plot(year_data['rental_month'], year_data['count_rentals'], label=str(year))
-
-ax.set_title('Count of Rental Orders by Month for All Years')
-ax.set_xlabel('Month')
-ax.set_ylabel('Count of Rentals')
-ax.legend(title='Year')
-plt.xticks(range(1, 13))
-plt.grid(True)
+# Plotting
+plt.figure(figsize=(10, 6))
+pivot_df.plot(kind='bar', stacked=True)
+plt.title('Rental Count by Month and Store')
+plt.xlabel('Year, Month')
+plt.ylabel('Count of Rentals')
+plt.xticks(rotation=45)
+plt.legend(title='Store ID')
+plt.tight_layout()
 plt.show()
 ```
 
 
+    <Figure size 1000x600 with 0 Axes>
+
+
+
     
-![png](analyst_files/analyst_10_0.png)
+![png](analyst_files/analyst_11_1.png)
     
 
 
@@ -143,19 +151,17 @@ plt.show()
 
 ```python
 df = pd.read_csv("data/s2_q2.csv")
-# Convert pay_month to datetime format
+# Convert 'pay_month' to datetime
 df['pay_month'] = pd.to_datetime(df['pay_month'])
 
-# Group by full_name and plot pay_amount over time for each full_name
-plt.figure(figsize=(12, 6))
-
+# Plot
+plt.figure(figsize=(10, 6))
 for name, group in df.groupby('full_name'):
-    plt.plot(group['pay_month'], group['pay_amount'], label=name)
+    plt.plot(group['pay_month'], group['pay_amount'], marker='o', label=name)
 
-plt.xlabel('Pay Month')
-plt.ylabel('Pay Amount')
-plt.title('Pay Amount Over Time')
-plt.legend()
+plt.title('Monthly Payment Amount by Person')
+plt.xlabel('Month')
+plt.ylabel('Payment Amount')
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
@@ -163,7 +169,7 @@ plt.show()
 
 
     
-![png](analyst_files/analyst_12_0.png)
+![png](analyst_files/analyst_13_0.png)
     
 
 
@@ -190,6 +196,6 @@ plt.show()
 
 
     
-![png](analyst_files/analyst_14_0.png)
+![png](analyst_files/analyst_15_0.png)
     
 
